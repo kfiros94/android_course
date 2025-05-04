@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'otp_verification_screen.dart';   // ← הוסף import
+import 'otp_verification_screen.dart';
 
 class LoginPhoneScreen extends StatefulWidget {
   const LoginPhoneScreen({super.key});
@@ -12,6 +12,25 @@ class LoginPhoneScreen extends StatefulWidget {
 
 class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
   final _phoneController = TextEditingController();
+
+  /// Sorted alphabetically by country name
+  static const _countries = [
+    {'label': '🇦🇺 +61', 'prefix': '+61'},  // Australia
+    {'label': '🇧🇷 +55', 'prefix': '+55'},  // Brazil
+    {'label': '🇬🇧 +44', 'prefix': '+44'},  // Britain / UK
+    {'label': '🇫🇷 +33', 'prefix': '+33'},  // France
+    {'label': '🇩🇪 +49', 'prefix': '+49'},  // Germany
+    {'label': '🇮🇳 +91', 'prefix': '+91'},  // India
+    {'label': '🇮🇱 +972', 'prefix': '+972'}, // Israel
+    {'label': '🇮🇹 +39', 'prefix': '+39'},  // Italy
+    {'label': '🇯🇵 +81', 'prefix': '+81'},  // Japan
+    {'label': '🇲🇽 +52', 'prefix': '+52'},  // Mexico
+    {'label': '🇳🇱 +31', 'prefix': '+31'},  // Netherlands
+    {'label': '🇪🇸 +34', 'prefix': '+34'},  // Spain
+    {'label': '🇺🇸 +1',  'prefix': '+1'},   // USA
+  ];
+
+  String _selectedPrefix = _countries.first['prefix']!;
 
   @override
   void dispose() {
@@ -52,17 +71,41 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
             ),
             const SizedBox(height: 32),
 
-            // --- Phone number input ---
-            TextField(
-              controller: _phoneController,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                labelText: 'Phone Number',
-                prefixIcon: const Icon(Icons.phone),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
+            // --- Country prefix + phone input ---
+            Row(
+              children: [
+                DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedPrefix,
+                    items: _countries
+                        .map(
+                          (c) => DropdownMenuItem<String>(
+                            value: c['prefix'],
+                            child: Text(c['label']!),
+                          ),
+                        )
+                        .toList(),
+                    onChanged: (v) {
+                      if (v != null) {
+                        setState(() => _selectedPrefix = v);
+                      }
+                    },
+                  ),
                 ),
-              ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      hintText: 'Phone',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 32),
 
@@ -72,12 +115,11 @@ class _LoginPhoneScreenState extends State<LoginPhoneScreen> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  final phone = _phoneController.text.trim();
-                  if (phone.isEmpty) return;
+                  final phone = '$_selectedPrefix${_phoneController.text.trim()}';
+                  if (phone.length < 5) return; // rudimentary check
 
-                  // TODO: trigger Firebase Auth verifyPhoneNumber here
+                  // TODO: trigger Firebase Auth verifyPhoneNumber here
 
-                  // מעבר למסך אימות‑OTP
                   Navigator.pushNamed(
                     context,
                     OtpVerificationScreen.routeName,

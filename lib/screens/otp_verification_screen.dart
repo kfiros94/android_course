@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// מסך הזנת קוד‑SMS (OTP)
+/// OTP verification screen with 6 separate boxes, like a PIN keypad
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({super.key, required this.phoneNumber});
 
   static const routeName = '/verifyOtp';
 
-  /// מספר הטלפון שאליו נשלח הקוד (להצגה או ל‑re‑send)
   final String phoneNumber;
 
   @override
@@ -15,12 +14,55 @@ class OtpVerificationScreen extends StatefulWidget {
 }
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
-  final _otpController = TextEditingController();
+  final _controllers = List.generate(6, (_) => TextEditingController());
+  final _nodes = List.generate(6, (_) => FocusNode());
+
+  /// combine the 6 single‑digit boxes into one string
+  String get _otp => _controllers.map((c) => c.text).join();
 
   @override
   void dispose() {
-    _otpController.dispose();
+    for (final c in _controllers) c.dispose();
+    for (final n in _nodes) n.dispose();
     super.dispose();
+  }
+
+  /// builds one box – grey rounded background, single digit text field
+  Widget _buildBox(int index) {
+    return SizedBox(
+      width: 48,
+      child: TextField(
+        controller: _controllers[index],
+        focusNode: _nodes[index],
+        keyboardType: TextInputType.number,
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+        maxLength: 1,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+        decoration: InputDecoration(
+          counterText: '',
+          filled: true,
+          fillColor: const Color(0xFFF1F5FF), // light grey/blue like screenshot
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        onChanged: (value) {
+          // auto‑move focus forward/back
+          if (value.isNotEmpty) {
+            if (index < 5) {
+              _nodes[index + 1].requestFocus();
+            } else {
+              _nodes[index].unfocus();
+            }
+          } else if (index > 0) {
+            _nodes[index - 1].requestFocus();
+          }
+          setState(() {}); // refresh Verify btn enable state
+        },
+      ),
+    );
   }
 
   @override
@@ -38,9 +80,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         child: Column(
           children: [
             const SizedBox(height: 40),
-            Center(
-              child: Image.asset('assets/images/phone_login.png', height: 180),
-            ),
+            Center(child: Image.asset('assets/images/phone_login.png', height: 180)),
             const SizedBox(height: 40),
             Text(
               'We have sent an SMS with a 6‑digit code to\n${widget.phoneNumber}',
@@ -49,50 +89,37 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             ),
             const SizedBox(height: 32),
 
-            // קלט הקוד
-            TextField(
-              controller: _otpController,
-              textAlign: TextAlign.center,
-              keyboardType: TextInputType.number,
-              maxLength: 6,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: InputDecoration(
-                counterText: '',
-                hintText: '••••••',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+            // --- six‑box OTP input ---
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(6, _buildBox),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
 
+            // --- Verify button ---
             SizedBox(
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: אמת את הקוד עם Firebase Auth או שירות אחר
+                onPressed: _otp.length == 6 ? () {
+                  // TODO: verify with Firebase Auth
 
-                  // אחרי אימות מוצלח – מעבר לדף הבית *עם* אפשרות חזרה
                   Navigator.pushNamed(context, '/home');
-                },
+                } : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF3F7DFB),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 ),
                 child: const Text('Verify', style: TextStyle(fontSize: 16)),
               ),
             ),
             const SizedBox(height: 16),
-
             TextButton(
               onPressed: () {
-                // TODO: שלח קוד מחדש
+                // TODO: resend code logic
               },
               child: const Text('Resend Code'),
-            )
+            ),
           ],
         ),
       ),
