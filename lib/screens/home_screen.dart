@@ -1,8 +1,10 @@
+// lib/home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'downloads_screen.dart';
 import 'services_screen.dart';
 
-/// מסך הבית – Back = התנתקות (חזרה ל‑'/')
+/// מסך הבית – Back = התנתקות (חזרה ל-'/')
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -16,7 +18,23 @@ class HomeScreen extends StatelessWidget {
         return false;
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Home')),
+        appBar: AppBar(
+          title: const Text('Home'),
+          automaticallyImplyLeading: false, // הסרה של כפתור חזרה אוטומטי
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.logout),
+              tooltip: 'Logout',
+              onPressed: () {
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  '/', // חזרה ל־WelcomeScreen
+                  (route) => false,
+                );
+              },
+            ),
+          ],
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

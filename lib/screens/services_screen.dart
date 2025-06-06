@@ -15,7 +15,6 @@ class ServicesScreen extends StatefulWidget {
 }
 
 class _ServicesScreenState extends State<ServicesScreen> {
-  // Replace asset paths with your own images
   final _services = const [
     Service('Cleaning', 'assets/images/svc_cleaning.png'),
     Service('Plumber', 'assets/images/svc_plumber.png'),
@@ -34,14 +33,28 @@ class _ServicesScreenState extends State<ServicesScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
+        leading: IconButton(
+          tooltip: 'back_home',
+          onPressed: () => Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/home',
+            (route) => false,
+          ),
+          icon: const Icon(Icons.home),
+          color: Colors.black,
+        ),
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _selectedIndex == null
             ? null
             : () {
-                // TODO: navigate to next step, pass selected service
-                Navigator.pushNamed(context, '/home');
+                final selectedService = _services[_selectedIndex!].name;
+                Navigator.pushNamed(
+                  context,
+                  '/dashboard',
+                  arguments: selectedService,
+                );
               },
         backgroundColor:
             _selectedIndex == null ? Colors.grey.shade400 : const Color(0xFF3F7DFB),
@@ -88,7 +101,7 @@ class _ServicesScreenState extends State<ServicesScreen> {
                         children: [
                           Image.asset(
                             svc.asset,
-                            width: 80, // enlarged icon
+                            width: 80,
                             height: 80,
                             fit: BoxFit.contain,
                           ),

@@ -1,5 +1,10 @@
+// lib/downloads_screen.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
+
+// 1) NEW: import our ResumeScreen
+import 'resume_screen.dart';
 
 /// מודל מצב הורדה
 enum DownloadStatus { idle, downloading, done }
@@ -7,7 +12,7 @@ enum DownloadStatus { idle, downloading, done }
 class DownloadItem {
   DownloadItem(this.title);
   final String title;
-  double progress = 0; // 0‑1
+  double progress = 0; // 0-1
   DownloadStatus status = DownloadStatus.idle;
 }
 
@@ -28,7 +33,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
 
   /// מפעיל הורדה מדומה עם עדכון התקדמות
   void _startDownload(DownloadItem item) {
-    if (item.status == DownloadStatus.downloading || item.status == DownloadStatus.done) return;
+    if (item.status == DownloadStatus.downloading ||
+        item.status == DownloadStatus.done) return;
 
     setState(() {
       item.status = DownloadStatus.downloading;
@@ -54,6 +60,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Downloads')),
+
+      // 2) body stays exactly the same
       body: ListView.separated(
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         itemCount: _items.length,
@@ -62,7 +70,8 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           final item = _items[index];
           return Card(
             elevation: 3,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             child: Padding(
               padding: const EdgeInsets.all(12.0),
               child: Row(
@@ -83,25 +92,31 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(item.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        Text(item.title,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w600)),
                         const SizedBox(height: 6),
                         if (item.status == DownloadStatus.downloading)
                           LinearProgressIndicator(value: item.progress)
                         else if (item.status == DownloadStatus.done)
-                          const Text('Downloaded', style: TextStyle(color: Colors.green))
+                          const Text('Downloaded',
+                              style: TextStyle(color: Colors.green)),
                       ],
                     ),
                   ),
                   const SizedBox(width: 16),
                   // --- Action button
                   ElevatedButton(
-                    onPressed: item.status == DownloadStatus.idle ? () => _startDownload(item) : null,
+                    onPressed: item.status == DownloadStatus.idle
+                        ? () => _startDownload(item)
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: (item.status == DownloadStatus.done)
                           ? Colors.green
                           : const Color(0xFF3F7DFB),
                       minimumSize: const Size(100, 40),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
                     ),
                     child: Text(
                       item.status == DownloadStatus.done
@@ -117,6 +132,22 @@ class _DownloadsScreenState extends State<DownloadsScreen> {
           );
         },
       ),
+
+      // 3) ADD a FloatingActionButton that navigates to ResumeScreen:
+      floatingActionButton: FloatingActionButton.extended(
+        icon: const Icon(Icons.picture_as_pdf),
+        label: const Text('Resume'),
+        backgroundColor: Colors.pink,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ResumeScreen()),
+          );
+        },
+      ),
+
+      // 4) (Optional) Change FAB location if you want it centered, etc.
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
