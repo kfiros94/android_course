@@ -44,11 +44,11 @@ class ResumeScreen extends StatelessWidget {
                     size: 32,
                   ),
                   title: const Text(
-                    'CV_R Rifa Fauzi Komara.pdf',
+                    'CV - Kfir Amoyal.pdf',
                     style: TextStyle(fontSize: 16),
                   ),
                   subtitle: const Text(
-                    '/Users/rifafauzikomara/Library/Developer/...',
+                    '/Users/kfira/Library/Developer/...',
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                   onTap: () {
